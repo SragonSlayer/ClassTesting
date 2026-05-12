@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced JavaScript Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .calculator {
+            background-color: #333;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+        }
+        .display {
+            background-color: #222;
+            color: #fff;
+            font-size: 24px;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            text-align: right;
+            min-height: 40px;
+            word-wrap: break-word;
+        }
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+        }
+        button {
+            padding: 15px;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .number {
+            background-color: #666;
+            color: white;
+        }
+        .number:hover {
+            background-color: #777;
+        }
+        .operator {
+            background-color: #ff9500;
+            color: white;
+        }
+        .operator:hover {
+            background-color: #ffad33;
+        }
+        .function {
+            background-color: #a6a6a6;
+            color: black;
+        }
+        .function:hover {
+            background-color: #b8b8b8;
+        }
+        .equals {
+            background-color: #ff9500;
+            color: white;
+            grid-column: span 2;
+        }
+        .equals:hover {
+            background-color: #ffad33;
+        }
+        .clear {
+            background-color: #a6a6a6;
+            color: black;
+        }
+        .clear:hover {
+            background-color: #b8b8b8;
+        }
+        .memory {
+            background-color: #666;
+            color: white;
+        }
+        .memory:hover {
+            background-color: #777;
+        }
+        .history {
+            margin-top: 20px;
+            background-color: white;
+            padding: 10px;
+            border-radius: 5px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .history-item {
+            padding: 5px;
+            border-bottom: 1px solid #eee;
+        }
+        .stats {
+            margin-top: 20px;
+            background-color: white;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Advanced JavaScript Calculator</h1>
+    <div class="calculator">
+        <div class="display" id="display">0</div>
+        <div class="buttons">
+            <button class="clear" onclick="clearDisplay()">C</button>
+            <button class="clear" onclick="clearEntry()">CE</button>
+            <button class="memory" onclick="memoryStore()">MS</button>
+            <button class="memory" onclick="memoryRecall()">MR</button>
+            <button class="memory" onclick="memoryClear()">MC</button>
+
+            <button class="function" onclick="appendToDisplay('sin(')">sin</button>
+            <button class="function" onclick="appendToDisplay('cos(')">cos</button>
+            <button class="function" onclick="appendToDisplay('tan(')">tan</button>
+            <button class="function" onclick="appendToDisplay('log(')">log</button>
+            <button class="function" onclick="appendToDisplay('ln(')">ln</button>
+
+            <button class="function" onclick="appendToDisplay('sqrt(')">√</button>
+            <button class="function" onclick="appendToDisplay('pow(')">x^y</button>
+            <button class="function" onclick="appendToDisplay('pi')">π</button>
+            <button class="function" onclick="appendToDisplay('e')">e</button>
+            <button class="function" onclick="appendToDisplay('phi')">φ</button>
+
+            <button class="number" onclick="appendToDisplay('7')">7</button>
+            <button class="number" onclick="appendToDisplay('8')">8</button>
+            <button class="number" onclick="appendToDisplay('9')">9</button>
+            <button class="operator" onclick="appendToDisplay('/')">/</button>
+            <button class="function" onclick="appendToDisplay('(')">(</button>
+
+            <button class="number" onclick="appendToDisplay('4')">4</button>
+            <button class="number" onclick="appendToDisplay('5')">5</button>
+            <button class="number" onclick="appendToDisplay('6')">6</button>
+            <button class="operator" onclick="appendToDisplay('*')">*</button>
+            <button class="function" onclick="appendToDisplay(')')">)</button>
+
+            <button class="number" onclick="appendToDisplay('1')">1</button>
+            <button class="number" onclick="appendToDisplay('2')">2</button>
+            <button class="number" onclick="appendToDisplay('3')">3</button>
+            <button class="operator" onclick="appendToDisplay('-')">-</button>
+            <button class="function" onclick="appendToDisplay('mem[')">mem</button>
+
+            <button class="number" onclick="appendToDisplay('0')">0</button>
+            <button class="number" onclick="appendToDisplay('.')">.</button>
+            <button class="operator" onclick="appendToDisplay('%')">%</button>
+            <button class="operator" onclick="appendToDisplay('+')">+</button>
+            <button class="equals" onclick="calculate()">=</button>
+        </div>
+    </div>
+
+    <div class="history">
+        <h3>Calculation History</h3>
+        <div id="historyList"></div>
+    </div>
+
+    <div class="stats">
+        <h3>Statistics</h3>
+        <p>Total Calculations: <span id="totalCalc">0</span></p>
+        <p>Successful: <span id="successfulCalc">0</span></p>
+        <p>Errors: <span id="errorCalc">0</span></p>
+    </div>
+
+    <script>
+        class WebCalculator {
+            constructor() {
+                this.memory = {};
+                this.history = [];
+                this.constants = {
+                    pi: Math.PI,
+                    e: Math.E,
+                    phi: (1 + Math.sqrt(5)) / 2
+                };
+                this.display = document.getElementById('display');
+                this.historyList = document.getElementById('historyList');
+                this.totalCalc = document.getElementById('totalCalc');
+                this.successfulCalc = document.getElementById('successfulCalc');
+                this.errorCalc = document.getElementById('errorCalc');
+                this.currentInput = '0';
+                this.updateDisplay();
+            }
+
+            updateDisplay() {
+                this.display.textContent = this.currentInput;
+            }
+
+            appendToDisplay(value) {
+                if (this.currentInput === '0' && !isNaN(value)) {
+                    this.currentInput = value;
+                } else {
+                    this.currentInput += value;
+                }
+                this.updateDisplay();
+            }
+
+            clearDisplay() {
+                this.currentInput = '0';
+                this.updateDisplay();
+            }
+
+            clearEntry() {
+                this.currentInput = this.currentInput.slice(0, -1);
+                if (this.currentInput === '') {
+                    this.currentInput = '0';
+                }
+                this.updateDisplay();
+            }
+
+            calculate() {
+                try {
+                    let expression = this.currentInput;
+
+                    // Replace constants
+                    expression = expression.replace(/\b(pi|e|phi)\b/g, (match) => this.constants[match]);
+
+                    // Replace memory references
+                    expression = expression.replace(/mem\[(\w+)\]/g, (match, key) => {
+                        return this.memory[key] !== undefined ? this.memory[key] : 'undefined';
+                    });
+
+                    // Safe evaluation
+                    const result = this.safeEval(expression);
+                    this.history.push({ expression: this.currentInput, result });
+                    this.currentInput = result.toString();
+                    this.updateDisplay();
+                    this.updateHistory();
+                    this.updateStats();
+                } catch (error) {
+                    this.display.textContent = `Error: ${error.message}`;
+                    this.display.classList.add('error');
+                    setTimeout(() => {
+                        this.display.classList.remove('error');
+                        this.clearDisplay();
+                    }, 2000);
+                    this.history.push({ expression: this.currentInput, result: `Error: ${error.message}` });
+                    this.updateHistory();
+                    this.updateStats();
+                }
+            }
+
+            safeEval(expression) {
+                // Whitelist of allowed functions and constants
+                const allowed = {
+                    Math: Math,
+                    sin: Math.sin,
+                    cos: Math.cos,
+                    tan: Math.tan,
+                    asin: Math.asin,
+                    acos: Math.acos,
+                    atan: Math.atan,
+                    log: Math.log,
+                    log10: Math.log10,
+                    ln: Math.log,
+                    exp: Math.exp,
+                    sqrt: Math.sqrt,
+                    pow: Math.pow,
+                    abs: Math.abs,
+                    ceil: Math.ceil,
+                    floor: Math.floor,
+                    round: Math.round,
+                    min: Math.min,
+                    max: Math.max,
+                    random: Math.random,
+                    PI: Math.PI,
+                    E: Math.E,
+                    Infinity: Infinity,
+                    NaN: NaN
+                };
+
+                // Create a function with limited scope
+                const func = new Function(...Object.keys(allowed), `return (${expression});`);
+                return func(...Object.values(allowed));
+            }
+
+            memoryStore() {
+                const key = prompt('Enter memory key:');
+                if (key) {
+                    const value = parseFloat(this.currentInput);
+                    if (!isNaN(value)) {
+                        this.memory[key] = value;
+                        alert(`Stored ${value} in memory[${key}]`);
+                    } else {
+                        alert('Invalid value for storage');
+                    }
+                }
+            }
+
+            memoryRecall() {
+                const key = prompt('Enter memory key:');
+                if (key && this.memory[key] !== undefined) {
+                    this.currentInput = this.memory[key].toString();
+                    this.updateDisplay();
+                } else {
+                    alert(`Memory[${key}] not found`);
+                }
+            }
+
+            memoryClear() {
+                this.memory = {};
+                alert('Memory cleared');
+            }
+
+            updateHistory() {
+                const recentHistory = this.history.slice(-10);
+                this.historyList.innerHTML = recentHistory.map((item, index) =>
+                    `<div class="history-item">${index + 1}: ${item.expression} = ${item.result}</div>`
+                ).join('');
+            }
+
+            updateStats() {
+                const total = this.history.length;
+                const errors = this.history.filter(item => typeof item.result === 'string' && item.result.startsWith('Error')).length;
+                const successful = total - errors;
+                this.totalCalc.textContent = total;
+                this.successfulCalc.textContent = successful;
+                this.errorCalc.textContent = errors;
+            }
+        }
+
+        // Initialize calculator
+        const calc = new WebCalculator();
+
+        // Keyboard support
+        document.addEventListener('keydown', (event) => {
+            const key = event.key;
+            if (key >= '0' && key <= '9') {
+                calc.appendToDisplay(key);
+            } else if (key === '+' || key === '-' || key === '*' || key === '/' || key === '%' || key === '.') {
+                calc.appendToDisplay(key);
+            } else if (key === 'Enter' || key === '=') {
+                calc.calculate();
+            } else if (key === 'Escape' || key === 'c' || key === 'C') {
+                calc.clearDisplay();
+            } else if (key === 'Backspace') {
+                calc.clearEntry();
+            }
+        });
+
+        // Make functions global for onclick handlers
+        window.appendToDisplay = (value) => calc.appendToDisplay(value);
+        window.clearDisplay = () => calc.clearDisplay();
+        window.clearEntry = () => calc.clearEntry();
+        window.calculate = () => calc.calculate();
+        window.memoryStore = () => calc.memoryStore();
+        window.memoryRecall = () => calc.memoryRecall();
+        window.memoryClear = () => calc.memoryClear();
+    </script>
+</body>
+</html>

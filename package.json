@@ -1,0 +1,85 @@
+{
+  "name": "advanced-calculator",
+  "version": "1.0.0",
+  "description": "A comprehensive JavaScript calculator with CLI and web interfaces",
+  "main": "calculator.js",
+  "scripts": {
+    "start": "node calculator.js",
+    "test": "jest calculator.test.js",
+    "test:watch": "jest calculator.test.js --watch",
+    "lint": "eslint *.js",
+    "build": "echo 'No build step required'",
+    "serve": "http-server -p 3000"
+  },
+  "keywords": [
+    "calculator",
+    "javascript",
+    "math",
+    "cli",
+    "web",
+    "trigonometry",
+    "logarithms"
+  ],
+  "author": "AI Assistant",
+  "license": "MIT",
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "eslint": "^8.57.0"
+  },
+  "dependencies": {},
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SragonSlayer/ClassTesting.git"
+  },
+  "bugs": {
+    "url": "https://github.com/SragonSlayer/ClassTesting/issues"
+  },
+  "homepage": "https://github.com/SragonSlayer/ClassTesting#readme",
+  "jest": {
+    "testEnvironment": "node",
+    "collectCoverage": true,
+    "coverageReporters": [
+      "text",
+      "lcov",
+      "html"
+    ],
+    "coverageDirectory": "coverage"
+  },
+  "eslintConfig": {
+    "env": {
+      "browser": true,
+      "node": true,
+      "es6": true
+    },
+    "extends": [
+      "eslint:recommended"
+    ],
+    "parserOptions": {
+      "ecmaVersion": 2020,
+      "sourceType": "module"
+    },
+    "rules": {
+      "no-unused-vars": "warn",
+      "no-console": "off",
+      "indent": [
+        "error",
+        4
+      ],
+      "linebreak-style": [
+        "error",
+        "unix"
+      ],
+      "quotes": [
+        "error",
+        "single"
+      ],
+      "semi": [
+        "error",
+        "always"
+      ]
+    }
+  }
+}
